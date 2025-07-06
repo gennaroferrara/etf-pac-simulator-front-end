@@ -1,4 +1,4 @@
-import { TrendingUp, DollarSign, BarChart3, AlertTriangle, Target, Save, Download, Calculator, Activity, Shield } from 'lucide-react';
+import { TrendingUp, DollarSign, BarChart3, AlertTriangle, Target, Save, Calculator, Activity, Shield } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
 
 const Results = ({ results, simulationData, config, onSaveSimulation }) => {
@@ -253,54 +253,8 @@ const Results = ({ results, simulationData, config, onSaveSimulation }) => {
         </div>
       </div>
 
-      {/* Analisi Rischio-Rendimento */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Analisi Rischio-Rendimento</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
-              <Calculator className="h-8 w-8 text-blue-600" />
-            </div>
-            <h4 className="font-semibold text-gray-800">Consistency Score</h4>
-            <p className="text-2xl font-bold text-blue-600">
-              {((results.consistency || 0) * 100).toFixed(0)}%
-            </p>
-            <p className="text-sm text-gray-500">Performance stability</p>
-          </div>
-          
-          <div className="text-center">
-            <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
-              <TrendingUp className="h-8 w-8 text-green-600" />
-            </div>
-            <h4 className="font-semibold text-gray-800">Risk-Adjusted Return</h4>
-            <p className="text-2xl font-bold text-green-600">{(results.sharpeRatio || 0).toFixed(2)}</p>
-            <p className="text-sm text-gray-500">Sharpe Ratio</p>
-          </div>
-          
-          <div className="text-center">
-            <div className="bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
-              <Activity className="h-8 w-8 text-purple-600" />
-            </div>
-            <h4 className="font-semibold text-gray-800">Downside Protection</h4>
-            <p className="text-2xl font-bold text-purple-600">{(results.calmarRatio || 0).toFixed(2)}</p>
-            <p className="text-sm text-gray-500">Calmar Ratio</p>
-          </div>
-          
-          <div className="text-center">
-            <div className="bg-orange-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-2">
-              <Shield className="h-8 w-8 text-orange-600" />
-            </div>
-            <h4 className="font-semibold text-gray-800">Risk Score</h4>
-            <p className="text-2xl font-bold text-orange-600">
-              {Math.min(10, Math.max(1, 10 - Math.abs(results.maxDrawdown || 0) / 5)).toFixed(1)}/10
-            </p>
-            <p className="text-sm text-gray-500">Portfolio risk level</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Export e Azioni */}
-      <div className="flex justify-center space-x-4">
+      {/* Save Action */}
+      <div className="flex justify-center">
         {onSaveSimulation && (
           <button
             onClick={onSaveSimulation}
@@ -310,16 +264,6 @@ const Results = ({ results, simulationData, config, onSaveSimulation }) => {
             Salva Simulazione
           </button>
         )}
-        
-        <button className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          <Download className="mr-2 h-4 w-4" />
-          Export PDF
-        </button>
-        
-        <button className="flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-          <BarChart3 className="mr-2 h-4 w-4" />
-          Confronta Strategie
-        </button>
       </div>
     </div>
   );

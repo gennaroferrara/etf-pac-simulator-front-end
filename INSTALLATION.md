@@ -88,8 +88,7 @@ tree src/  # o ls -la src/ se tree non è disponibile
 12. **`src/components/Results/Results.jsx`** - Risultati
 13. **`src/components/Comparison/Comparison.jsx`** - Confronto
 14. **`src/components/Backtest/Backtest.jsx`** - Backtesting
-15. **`src/components/Analysis/Analysis.jsx`** - Analisi AI
-16. **`src/App.jsx`** - App principale
+15. **`src/App.jsx`** - App principale
 
 ### **Step 6: Configurazione Vite**
 

@@ -1,56 +1,9 @@
-import { DollarSign, Activity, Shield, Target, Play, BarChart3, Clock, Brain, Globe, Save } from 'lucide-react';
+import { Play, BarChart3, Clock, Brain, Globe, Save } from 'lucide-react';
 import { ETF_OPTIONS } from '../../constants';
 
-const Dashboard = ({ user, setActiveTab, savedSimulations = [] }) => {
+const Dashboard = ({ setActiveTab, savedSimulations = [] }) => {
   return (
     <div className="space-y-6">
-      {/* Header con statistiche utente */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-100">Portfolio Totale</p>
-              <p className="text-2xl font-bold">€{user.totalPortfolio?.toLocaleString() || '0'}</p>
-              <p className="text-sm text-blue-200">+12.5% YTD</p>
-            </div>
-            <DollarSign className="h-8 w-8 text-blue-200" />
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-green-100">Simulazioni Attive</p>
-              <p className="text-2xl font-bold">{user.activeSimulations || 0}</p>
-              <p className="text-sm text-green-200">+2 questo mese</p>
-            </div>
-            <Activity className="h-8 w-8 text-green-200" />
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-purple-100">Profilo Rischio</p>
-              <p className="text-xl font-bold capitalize">{user.riskProfile || 'N/A'}</p>
-              <p className="text-sm text-purple-200">Ottimizzato</p>
-            </div>
-            <Shield className="h-8 w-8 text-purple-200" />
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-orange-100">Esperienza</p>
-              <p className="text-xl font-bold capitalize">{user.experience || 'N/A'}</p>
-              <p className="text-sm text-orange-200">3 anni</p>
-            </div>
-            <Target className="h-8 w-8 text-orange-200" />
-          </div>
-        </div>
-      </div>
-
       {/* Quick Actions */}
       <div className="bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-xl font-bold text-gray-800 mb-4">Azioni Rapide</h3>
@@ -93,7 +46,7 @@ const Dashboard = ({ user, setActiveTab, savedSimulations = [] }) => {
       <div className="bg-white rounded-xl shadow-lg p-6">
         <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
           <Globe className="mr-2" />
-          Panoramica Mercati
+          Panoramica ETF Disponibili
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {ETF_OPTIONS.slice(0, 6).map((etf) => (

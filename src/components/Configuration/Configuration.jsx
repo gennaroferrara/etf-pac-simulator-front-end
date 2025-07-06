@@ -209,94 +209,12 @@ const Configuration = ({ config, setConfig, onRunSimulation, isSimulating, onSav
                       <span className="text-gray-500">Win Rate:</span>
                       <span className="font-medium text-green-600">{strategy.winRate}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Orizzonte:</span>
-                      <span className="font-medium">{strategy.timeHorizon}</span>
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Impostazioni Avanzate */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-gray-800">Impostazioni Avanzate</h3>
-          <button
-            onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
-            className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            {showAdvancedSettings ? <EyeOff className="h-4 w-4 mr-1" /> : <Eye className="h-4 w-4 mr-1" />}
-            {showAdvancedSettings ? 'Nascondi' : 'Mostra'}
-          </button>
-        </div>
-        
-        {showAdvancedSettings && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Frequenza Ribilanciamento
-              </label>
-              <select
-                value={config.rebalanceFrequency || 'quarterly'}
-                onChange={(e) => handleConfigChange('rebalanceFrequency', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="monthly">Mensile</option>
-                <option value="quarterly">Trimestrale</option>
-                <option value="semiannual">Semestrale</option>
-                <option value="annual">Annuale</option>
-                <option value="never">Mai</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Stop Loss (%)
-              </label>
-              <input
-                type="number"
-                value={config.stopLoss || 0}
-                onChange={(e) => handleConfigChange('stopLoss', parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                min="0"
-                max="50"
-                step="0.5"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Take Profit Target (%)
-              </label>
-              <input
-                type="number"
-                value={config.takeProfitTarget || 0}
-                onChange={(e) => handleConfigChange('takeProfitTarget', parseFloat(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                min="0"
-                max="200"
-                step="0.5"
-              />
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="automaticRebalance"
-                checked={config.automaticRebalance || false}
-                onChange={(e) => handleConfigChange('automaticRebalance', e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="automaticRebalance" className="text-sm text-gray-700">
-                Ribilanciamento Automatico
-              </label>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Pulsanti Azione */}
@@ -326,16 +244,6 @@ const Configuration = ({ config, setConfig, onRunSimulation, isSimulating, onSav
           <Clock className="mr-2 h-4 w-4" />
           Backtesting
         </button>
-        
-        {onSaveSimulation && (
-          <button
-            onClick={onSaveSimulation}
-            className="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            <Save className="mr-2 h-4 w-4" />
-            Salva Configurazione
-          </button>
-        )}
       </div>
     </div>
   );

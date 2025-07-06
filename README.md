@@ -16,7 +16,6 @@ Una piattaforma avanzata per la simulazione di investimenti ETF con Piano di Acc
 - **Simulazione PAC Avanzata** con 6 strategie di investimento
 - **Portfolio Multi-ETF** con allocazione dinamica personalizzabile
 - **Backtesting Storico** su dati reali degli ultimi anni
-- **Analisi AI/ML** per ottimizzazione portfolio e predizioni
 - **Confronto Strategie** multiple in tempo reale
 - **Sistema Notifiche** e gestione stato avanzata
 
@@ -90,7 +89,6 @@ etf-pac-simulator/
 │   │   ├── Results/        # Risultati simulazioni
 │   │   ├── Comparison/     # Confronto strategie
 │   │   ├── Backtest/       # Backtesting storico
-│   │   ├── Analysis/       # Analisi AI/ML
 │   │   └── UI/            # Componenti riutilizzabili
 │   ├── hooks/             # Custom React hooks
 │   ├── services/          # API services
@@ -152,12 +150,6 @@ npm run lint               # Controlla codice con ESLint
 - Analisi performance per anno
 - Scenari di stress testing
 - Confronto con benchmark
-
-### **6. Analisi AI**
-- Portfolio optimization (teoria di Markowitz)
-- Risk parity analysis
-- Stress testing avanzato
-- Raccomandazioni personalizzate ML
 
 ## 🏗️ Architettura Backend (Futura Implementazione)
 
