@@ -151,49 +151,6 @@ npm run lint               # Controlla codice con ESLint
 - Scenari di stress testing
 - Confronto con benchmark
 
-## 🏗️ Architettura Backend (Futura Implementazione)
-
-### **Stack Consigliato**
-- **Backend**: Node.js + Express / Python FastAPI / Java Spring Boot
-- **Database**: PostgreSQL + Redis per cache
-- **Autenticazione**: JWT + OAuth2
-- **Real-time**: WebSocket per quotazioni live
-- **Deploy**: Docker + Kubernetes
-
-### **API Endpoints (Progettati)**
-```bash
-# Autenticazione
-POST /api/auth/login
-POST /api/auth/register
-POST /api/auth/refresh
-
-# Portfolio Management
-GET /api/portfolios
-POST /api/portfolios
-PUT /api/portfolios/:id
-DELETE /api/portfolios/:id
-
-# Market Data
-GET /api/market-data?symbols=VWCE,VUAA
-GET /api/market-data/historical/:symbol
-GET /api/market-data/real-time
-
-# Simulations
-POST /api/simulations
-GET /api/simulations/:id
-DELETE /api/simulations/:id
-
-# Analysis & ML
-POST /api/analysis/optimize
-POST /api/analysis/risk
-POST /api/analysis/stress-test
-GET /api/analysis/predictions
-
-# Backtesting
-POST /api/backtest/run
-GET /api/backtest/results/:id
-```
-
 ## 📊 Componenti Principali
 
 ### **useSimulation Hook**
@@ -206,17 +163,6 @@ const {
   runBacktest,
   resetSimulation
 } = useSimulation();
-```
-
-### **useNotifications Hook**
-```javascript
-const {
-  alerts,
-  showSuccess,
-  showError,
-  showWarning,
-  removeAlert
-} = useNotifications();
 ```
 
 ### **Utilities Finanziarie**
