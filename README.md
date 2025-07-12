@@ -253,27 +253,6 @@ RUN npm run build
 EXPOSE 5173
 CMD ["npm", "run", "preview"]
 ```
-
-## 📝 Project Work Universitario
-
-### **Documenti Richiesti**
-- [x] **Codice Frontend** (React + Vite)
-- [x] **Architettura API** (design e documentazione)
-- [ ] **Diagrammi UML** (classi, sequenza, use case)
-- [ ] **Schema ER** (database design)
-- [ ] **Documentazione Swagger** (API specification)
-- [ ] **Report Tecnico** (processo sviluppo)
-- [ ] **Test Funzionali** (screenshot e casi d'uso)
-
-### **Competenze Dimostrate**
-- **Frontend Development**: React, state management, responsive design
-- **Financial Modeling**: calcoli finanziari, metriche di performance
-- **Data Visualization**: grafici interattivi, dashboard analytics
-- **API Design**: architettura RESTful, microservices pattern
-- **Security**: JWT, autenticazione, protezione dati
-- **Testing**: unit tests, integration tests, coverage
-- **DevOps**: build optimization, deployment, containerization
-
 ## 🤝 Contributing
 
 1. Fork del repository
