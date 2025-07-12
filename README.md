@@ -1,8 +1,8 @@
-# 📈 ETF PAC Investment Simulator
+# 📈 ETF PAC Simulator
 
-**Advanced ETF PAC Investment Platform - University Project**
+**Advanced ETF PAC Platform - University Project**
 
-Una piattaforma avanzata per la simulazione di investimenti ETF con Piano di Accumulo del Capitale (PAC), sviluppata come project work universitario nel settore finanziario.
+Una piattaforma per la simulazione di investimenti ETF con Piano di Accumulo del Capitale (PAC), sviluppata come project work universitario.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![React](https://img.shields.io/badge/React-18.2-blue.svg)
@@ -342,21 +342,7 @@ Questo progetto è rilasciato sotto licenza MIT. Vedi [LICENSE](LICENSE) per det
 
 ## 👨‍💻 Autore
 
-**Marco Rossi**
-- Email: marco.rossi@studente.it
-- GitHub: [@marco-rossi](https://github.com/marco-rossi)
-- LinkedIn: [Marco Rossi](https://linkedin.com/in/marco-rossi)
-
-## 🙏 Ringraziamenti
-
-- **Università** per il supporto al project work
-- **Vanguard** per i dati ETF di riferimento
-- **React Team** per l'eccellente documentazione
-- **Tailwind CSS** per il framework di styling
-- **Recharts** per le librerie di visualizzazione
-
----
-
-**⭐ Se questo progetto ti è stato utile, considera di lasciare una stella!**
+**Genanro Ferrara**
+- Email: gennaro.ferrara@pegaso.it
 
 **🚀 Happy Investing!**

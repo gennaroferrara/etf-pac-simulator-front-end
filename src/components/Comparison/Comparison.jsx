@@ -1,9 +1,10 @@
+// src/components/Comparison/Comparison.jsx
 import { useState } from 'react';
 import { BarChart3, Play, TrendingUp, AlertTriangle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { STRATEGIES } from '../../constants';
 
-const Comparison = ({ runComparison, isSimulating }) => {
+const Comparison = ({ onRunComparison, isSimulating }) => {
   const [selectedStrategies, setSelectedStrategies] = useState(['dca']);
   const [comparisonResults, setComparisonResults] = useState(null);
   const [baseConfig, setBaseConfig] = useState({
@@ -32,56 +33,68 @@ const Comparison = ({ runComparison, isSimulating }) => {
   const runComparisonSimulation = async () => {
     if (selectedStrategies.length < 2) return;
 
-    // Simula confronto tra strategie
-    const mockResults = selectedStrategies.map((strategyId, index) => {
-      const strategy = STRATEGIES.find(s => s.id === strategyId);
-      const baseReturn = 8 + (Math.random() - 0.5) * 6;
-      const volatility = 12 + (Math.random() - 0.5) * 8;
-      const maxDrawdown = -15 - (Math.random() * 20);
+    try {
+      const results = await onRunComparison(selectedStrategies, baseConfig);
       
-      return {
-        strategy: strategyId,
-        name: strategy.name,
-        icon: strategy.icon,
-        finalReturn: baseReturn + index * 1.5,
-        volatility: volatility,
-        sharpeRatio: (baseReturn - 2) / volatility,
-        maxDrawdown: maxDrawdown,
-        winRate: 60 + Math.random() * 20,
-        calmarRatio: baseReturn / Math.abs(maxDrawdown),
-        complexity: strategy.complexity,
-        riskLevel: strategy.riskLevel,
-        color: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'][index] || '#6B7280'
+      // Processa i risultati per il display
+      const processedResults = {
+        strategies: results.results ? Object.entries(results.results).map(([strategyId, data]) => {
+          const strategy = STRATEGIES.find(s => s.id === strategyId);
+          return {
+            strategy: strategyId,
+            name: strategy?.name || strategyId,
+            icon: strategy?.icon || '📊',
+            finalReturn: data.totalReturn || 0,
+            volatility: data.volatility || 0,
+            sharpeRatio: data.sharpeRatio || 0,
+            maxDrawdown: data.maxDrawdown || 0,
+            winRate: data.winRate || 0,
+            calmarRatio: data.calmarRatio || 0,
+            complexity: strategy?.complexity || 'N/A',
+            riskLevel: strategy?.riskLevel || 'N/A',
+            color: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'][selectedStrategies.indexOf(strategyId)] || '#6B7280'
+          };
+        }) : [],
+        monthlyData: generateMonthlyDataFromResults(results),
+        summary: results.summary,
+        bestStrategy: results.best_strategy
       };
-    });
 
-  const monthlyData = [];
-
-for (let month = 0; month < 60; month++) {
-  const dataPoint = { month };
-
-  mockResults.forEach(result => {
-    const volatility = result.volatility / 100;
-    const trend = result.finalReturn / 100 / 12;
-    const randomShock = (Math.random() - 0.5) * volatility;
-    const monthlyReturn = trend + randomShock;
-
-    if (month === 0) {
-      dataPoint[result.strategy] = 10000;
-    } else {
-      const prevValue = monthlyData[month - 1][result.strategy];
-      dataPoint[result.strategy] = prevValue * (1 + monthlyReturn) + 500;
+      setComparisonResults(processedResults);
+    } catch (error) {
+      console.error('Errore confronto strategie:', error);
+      // TODO: Mostra notifica errore
     }
-  });
+  };
 
-  monthlyData.push(dataPoint);
-}
-
-
-    setComparisonResults({
-      strategies: mockResults,
-      monthlyData: monthlyData
-    });
+  const generateMonthlyDataFromResults = (results) => {
+    // Genera dati mensili basati sui risultati
+    // Questo è un placeholder - idealmente dovrebbe venire dal backend
+    const monthlyData = [];
+    for (let month = 0; month < 60; month++) {
+      const dataPoint = { month };
+      
+      selectedStrategies.forEach(strategyId => {
+        const result = results.results?.[strategyId];
+        if (result) {
+          const trend = result.annualizedReturn / 12 / 100;
+          const volatility = result.volatility / 100 / Math.sqrt(12);
+          const randomShock = (Math.random() - 0.5) * 2 * volatility;
+          const monthlyReturn = trend + randomShock;
+          
+          if (month === 0) {
+            dataPoint[strategyId] = baseConfig.initialAmount;
+          } else {
+            const prevValue = monthlyData[month - 1][strategyId];
+            dataPoint[strategyId] = prevValue * (1 + monthlyReturn) + baseConfig.monthlyAmount;
+          }
+        }
+      });
+      
+      monthlyData.push(dataPoint);
+    }
+    
+    return monthlyData;
   };
 
   const getStrategyColor = (index) => {
@@ -331,126 +344,36 @@ for (let month = 0; month < 60; month++) {
             </div>
           </div>
 
-          {/* Radar Chart per Confronto Multi-dimensionale */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Confronto Multi-dimensionale</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ResponsiveContainer width="100%" height={400}>
-                <RadarChart data={comparisonResults.strategies.map(s => ({
-                  strategy: s.name.split(' ')[0],
-                  Rendimento: Math.max(0, s.finalReturn + 20), // Normalized to positive
-                  Sharpe: Math.max(0, s.sharpeRatio * 20),
-                  'Win Rate': s.winRate,
-                  Stabilità: Math.max(0, 100 + s.maxDrawdown), // Inverted drawdown
-                  Calmar: Math.max(0, s.calmarRatio * 20)
-                }))}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="strategy" />
-                  <PolarRadiusAxis angle={18} domain={[0, 100]} />
-                  {comparisonResults.strategies.map((result, index) => (
-                    <Radar
-                      key={result.strategy}
-                      name={result.name.split(' ')[0]}
-                      dataKey={result.name.split(' ')[0]}
-                      stroke={getStrategyColor(index)}
-                      fill={getStrategyColor(index)}
-                      fillOpacity={0.1}
-                      strokeWidth={2}
-                    />
-                  ))}
-                  <Legend />
-                </RadarChart>
-              </ResponsiveContainer>
-              
-              <div className="space-y-4">
-                <h4 className="font-semibold text-gray-800">Ranking per Metrica</h4>
+          {/* Raccomandazioni basate sui risultati */}
+          {comparisonResults.bestStrategy && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <TrendingUp className="mr-2" />
+                Raccomandazioni
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-2">✅ Strategia Consigliata</h4>
+                  <p className="text-green-700 text-sm mb-2">
+                    Per il tuo profilo di rischio, consigliamo la strategia con il miglior rapporto rischio-rendimento.
+                  </p>
+                  <p className="font-bold text-green-800">
+                    {STRATEGIES.find(s => s.id === comparisonResults.bestStrategy)?.name || comparisonResults.bestStrategy}
+                  </p>
+                </div>
                 
-                {/* Best Return */}
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-green-800 font-medium">🏆 Miglior Rendimento</span>
-                    <span className="text-green-600 font-bold">
-                      {comparisonResults.strategies
-                        .reduce((best, current) => current.finalReturn > best.finalReturn ? current : best)
-                        .name
-                      }
-                    </span>
-                  </div>
-                </div>
-
-                {/* Best Sharpe */}
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-blue-800 font-medium">⚖️ Miglior Risk-Adjusted</span>
-                    <span className="text-blue-600 font-bold">
-                      {comparisonResults.strategies
-                        .reduce((best, current) => current.sharpeRatio > best.sharpeRatio ? current : best)
-                        .name
-                      }
-                    </span>
-                  </div>
-                </div>
-
-                {/* Lowest Drawdown */}
-                <div className="bg-purple-50 p-3 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-purple-800 font-medium">🛡️ Maggior Protezione</span>
-                    <span className="text-purple-600 font-bold">
-                      {comparisonResults.strategies
-                        .reduce((best, current) => current.maxDrawdown > best.maxDrawdown ? current : best)
-                        .name
-                      }
-                    </span>
-                  </div>
-                </div>
-
-                {/* Highest Win Rate */}
-                <div className="bg-amber-50 p-3 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-amber-800 font-medium">🎯 Maggior Consistenza</span>
-                    <span className="text-amber-600 font-bold">
-                      {comparisonResults.strategies
-                        .reduce((best, current) => current.winRate > best.winRate ? current : best)
-                        .name
-                      }
-                    </span>
-                  </div>
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-2">💡 Considerazioni</h4>
+                  <ul className="text-blue-700 text-sm space-y-1">
+                    <li>• Le performance passate non garantiscono risultati futuri</li>
+                    <li>• Considera la tua tolleranza al rischio personale</li>
+                    <li>• Diversifica sempre i tuoi investimenti</li>
+                    <li>• Monitora periodicamente le performance</li>
+                  </ul>
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Raccomandazioni */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-              <TrendingUp className="mr-2" />
-              Raccomandazioni
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <h4 className="font-semibold text-green-800 mb-2">✅ Strategia Consigliata</h4>
-                <p className="text-green-700 text-sm mb-2">
-                  Per il tuo profilo di rischio, consigliamo la strategia con il miglior rapporto rischio-rendimento.
-                </p>
-                <p className="font-bold text-green-800">
-                  {comparisonResults.strategies
-                    .reduce((best, current) => current.sharpeRatio > best.sharpeRatio ? current : best)
-                    .name
-                  }
-                </p>
-              </div>
-              
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <h4 className="font-semibold text-blue-800 mb-2">💡 Considerazioni</h4>
-                <ul className="text-blue-700 text-sm space-y-1">
-                  <li>• Le performance passate non garantiscono risultati futuri</li>
-                  <li>• Considera la tua tolleranza al rischio personale</li>
-                  <li>• Diversifica sempre i tuoi investimenti</li>
-                  <li>• Monitora periodicamente le performance</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          )}
         </>
       )}
     </div>

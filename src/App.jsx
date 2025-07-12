@@ -1,9 +1,11 @@
+// src/App.jsx
 import { useState, useEffect } from 'react';
 import './index.css';
 
 // Import constants and utilities
 import { INITIAL_CONFIG } from './constants';
 import { useSimulation } from './hooks/useSimulation';
+import apiService from './services/api';
 
 // Import UI components
 import Header from './components/UI/Header';
@@ -22,6 +24,7 @@ const ETFPACSimulator = () => {
   const [config, setConfig] = useState(INITIAL_CONFIG);
   const [savedSimulations, setSavedSimulations] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState(1); // Default user ID
 
   // Custom hooks per funzionalità specializzate
   const { 
@@ -30,7 +33,9 @@ const ETFPACSimulator = () => {
     historicalData, 
     isSimulating, 
     runSimulation, 
-    runBacktest, 
+    runBacktest,
+    saveSimulation,
+    loadSimulations,
     resetSimulation 
   } = useSimulation();
 
@@ -43,11 +48,9 @@ const ETFPACSimulator = () => {
   const loadSavedSimulations = async () => {
     setIsLoading(true);
     try {
-      // Chiamata API per recuperare simulazioni salvate
-      const response = await fetch('/api/simulations');
-      if (response.ok) {
-        const data = await response.json();
-        setSavedSimulations(data);
+      const result = await loadSimulations();
+      if (result.success) {
+        setSavedSimulations(result.data);
       }
     } catch (error) {
       console.error('Errore caricamento simulazioni:', error);
@@ -59,12 +62,13 @@ const ETFPACSimulator = () => {
   // Handler per esecuzione simulazione
   const handleRunSimulation = async () => {
     try {
-      const result = await runSimulation(config);
+      const result = await runSimulation({ ...config, userId });
       
       if (result.success) {
         setActiveTab('results');
       } else {
         console.error('Errore simulazione:', result.error);
+        // TODO: Mostra notifica errore all'utente
       }
     } catch (error) {
       console.error('Errore simulazione:', error);
@@ -76,24 +80,31 @@ const ETFPACSimulator = () => {
     if (!results) return;
 
     try {
-      const simulation = {
+      const simulationToSave = {
         name: config.name || `Simulazione ${new Date().toLocaleDateString()}`,
-        config: { ...config },
-        results: { ...results },
-        simulationData: [...simulationData],
-        createdAt: new Date().toISOString()
+        initialAmount: config.initialAmount,
+        monthlyAmount: config.monthlyAmount,
+        investmentPeriod: config.investmentPeriod,
+        frequency: config.frequency?.toUpperCase() || 'MONTHLY',
+        strategy: config.strategy?.toUpperCase() || 'DCA',
+        etfAllocation: config.etfAllocation,
+        riskTolerance: config.riskTolerance?.toUpperCase() || 'MODERATE',
+        rebalanceFrequency: config.rebalanceFrequency?.toUpperCase() || 'QUARTERLY',
+        automaticRebalance: config.automaticRebalance !== false,
+        stopLoss: config.stopLoss || 0,
+        takeProfitTarget: config.takeProfitTarget || 0,
+        userId: userId
       };
 
-      // Salva nel backend
-      const response = await fetch('/api/simulations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(simulation)
-      });
-
-      if (response.ok) {
-        const saved = await response.json();
-        setSavedSimulations(prev => [...prev, saved]);
+      const result = await saveSimulation(simulationToSave);
+      
+      if (result.success) {
+        // Ricarica lista simulazioni
+        await loadSavedSimulations();
+        // TODO: Mostra notifica successo
+      } else {
+        console.error('Errore salvataggio:', result.error);
+        // TODO: Mostra notifica errore
       }
     } catch (error) {
       console.error('Errore salvataggio:', error);
@@ -107,9 +118,26 @@ const ETFPACSimulator = () => {
       
       if (!result.success) {
         console.error('Errore backtesting:', result.error);
+        // TODO: Mostra notifica errore
       }
     } catch (error) {
       console.error('Errore backtesting:', error);
+    }
+  };
+
+  // Handler per confronto strategie
+  const handleRunComparison = async (strategies, baseConfig) => {
+    try {
+      const response = await apiService.compareStrategies(strategies, baseConfig);
+
+      if (response.success) {
+        return response.data;
+      } else {
+        throw new Error(response.error || 'Errore confronto strategie');
+      }
+    } catch (error) {
+      console.error('Errore confronto strategie:', error);
+      throw error;
     }
   };
 
@@ -167,7 +195,7 @@ const ETFPACSimulator = () => {
         return (
           <Comparison 
             isSimulating={isSimulating}
-            onRunComparison={handleRunSimulation}
+            onRunComparison={handleRunComparison}
           />
         );
       

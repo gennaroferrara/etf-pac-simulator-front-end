@@ -1,4 +1,6 @@
+// src/hooks/useSimulation.js
 import { useState } from 'react';
+import apiService from '../services/api';
 
 export const useSimulation = () => {
   const [simulationData, setSimulationData] = useState([]);
@@ -11,24 +13,37 @@ export const useSimulation = () => {
     setIsSimulating(true);
     
     try {
-      const response = await fetch('/api/simulations/run', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(config)
-      });
+      // Prepara i dati nel formato richiesto dall'API
+      const simulationRequest = {
+        name: config.name || `Simulazione ${new Date().toLocaleDateString()}`,
+        initialAmount: config.initialAmount,
+        monthlyAmount: config.monthlyAmount,
+        investmentPeriod: config.investmentPeriod,
+        frequency: config.frequency?.toUpperCase() || 'MONTHLY',
+        strategy: config.strategy?.toUpperCase() || 'DCA',
+        etfAllocation: config.etfAllocation,
+        riskTolerance: config.riskTolerance?.toUpperCase() || 'MODERATE',
+        rebalanceFrequency: config.rebalanceFrequency?.toUpperCase() || 'QUARTERLY',
+        automaticRebalance: config.automaticRebalance !== false,
+        stopLoss: config.stopLoss || 0,
+        takeProfitTarget: config.takeProfitTarget || 0,
+        userId: 1 // Default user ID per demo
+      };
 
-      if (!response.ok) {
-        throw new Error('Errore simulazione');
+      const response = await apiService.runSimulation(simulationRequest);
+      
+      if (response.success) {
+        setSimulationData(response.data.simulationData);
+        setResults(response.data.results);
+        
+        return { 
+          success: true, 
+          data: response.data.simulationData, 
+          results: response.data.results 
+        };
+      } else {
+        throw new Error(response.error || 'Errore simulazione');
       }
-
-      const data = await response.json();
-      
-      setSimulationData(data.simulationData);
-      setResults(data.results);
-      
-      return { success: true, data: data.simulationData, results: data.results };
       
     } catch (error) {
       console.error('Simulation error:', error);
@@ -43,27 +58,110 @@ export const useSimulation = () => {
     setIsSimulating(true);
     
     try {
-      const response = await fetch('/api/backtest/run', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ config, period })
-      });
-
-      if (!response.ok) {
-        throw new Error('Errore backtesting');
+      // Calcola date basate sul periodo
+      const endDate = new Date();
+      const startDate = new Date();
+      
+      switch(period) {
+        case '1year':
+          startDate.setFullYear(startDate.getFullYear() - 1);
+          break;
+        case '3years':
+          startDate.setFullYear(startDate.getFullYear() - 3);
+          break;
+        case '5years':
+          startDate.setFullYear(startDate.getFullYear() - 5);
+          break;
+        case '10years':
+          startDate.setFullYear(startDate.getFullYear() - 10);
+          break;
+        default:
+          startDate.setFullYear(startDate.getFullYear() - 5);
       }
 
-      const data = await response.json();
-      setHistoricalData(data.historicalData);
+      const backtestRequest = {
+        name: `Backtest ${config.strategy} - ${period}`,
+        strategy: config.strategy?.toUpperCase() || 'DCA',
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0],
+        initialAmount: config.initialAmount,
+        monthlyAmount: config.monthlyAmount,
+        etfAllocation: config.etfAllocation,
+        frequency: config.frequency?.toUpperCase() || 'MONTHLY',
+        period: period.replace('years', 'Y').replace('year', 'Y').toUpperCase(),
+        riskTolerance: config.riskTolerance?.toUpperCase() || 'MODERATE',
+        rebalanceFrequency: config.rebalanceFrequency?.toUpperCase() || 'QUARTERLY',
+        automaticRebalance: config.automaticRebalance !== false,
+        stopLoss: config.stopLoss || 0,
+        takeProfitTarget: config.takeProfitTarget || 0,
+        includeTransactionCosts: false,
+        transactionCostPercentage: 0.1,
+        includeDividends: true,
+        benchmarkIndex: 'SP500',
+        userId: 1 // Default user ID per demo
+      };
+
+      const response = await apiService.runBacktest(backtestRequest);
       
-      return { success: true, data: data.historicalData };
+      if (response.success) {
+        setHistoricalData(response.data.historical_data || []);
+        return { success: true, data: response.data };
+      } else {
+        throw new Error(response.error || 'Errore backtesting');
+      }
     } catch (error) {
       console.error('Backtest error:', error);
       return { success: false, error: error.message };
     } finally {
       setIsSimulating(false);
+    }
+  };
+
+  // Salva simulazione
+  const saveSimulation = async (simulationToSave) => {
+    try {
+      const response = await apiService.saveSimulation(simulationToSave);
+      
+      if (response.success) {
+        return { success: true, data: response.data };
+      } else {
+        throw new Error(response.error || 'Errore salvataggio');
+      }
+    } catch (error) {
+      console.error('Save simulation error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Carica simulazioni salvate
+  const loadSimulations = async (page = 0, size = 20) => {
+    try {
+      const response = await apiService.getAllSimulations(page, size);
+      
+      if (response.success) {
+        return { success: true, data: response.data };
+      } else {
+        throw new Error(response.error || 'Errore caricamento simulazioni');
+      }
+    } catch (error) {
+      console.error('Load simulations error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  // Confronta simulazioni
+  const compareSimulations = async (simulationIds) => {
+    try {
+      const response = await apiService.compareSimulations(simulationIds);
+      
+      if (response.success) {
+        return { success: true, data: response.data };
+      } else {
+        throw new Error(response.error || 'Errore confronto simulazioni');
+      }
+    } catch (error) {
+      console.error('Compare simulations error:', error);
+      return { success: false, error: error.message };
     }
   };
 
@@ -81,6 +179,9 @@ export const useSimulation = () => {
     isSimulating,
     runSimulation,
     runBacktest,
+    saveSimulation,
+    loadSimulations,
+    compareSimulations,
     resetSimulation
   };
 };

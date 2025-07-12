@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// src/services/api.js
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
 
 class ApiService {
   constructor() {
@@ -18,247 +19,176 @@ class ApiService {
 
     try {
       const response = await fetch(url, config);
+      const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
       
-      return await response.json();
+      return data;
     } catch (error) {
       console.error('API request failed:', error);
       throw error;
     }
   }
 
-  // ========== SIMULAZIONI ==========
+  // ========== ETF MANAGEMENT ==========
   
-  // Esegui simulazione
-  async runSimulation(config) {
-    try {
-      return await this.request('/simulations/run', {
-        method: 'POST',
-        body: JSON.stringify(config),
-      });
-    } catch (error) {
-      throw new Error('Simulazione fallita');
-    }
+  // Ottieni tutti gli ETF
+  async getAllETFs() {
+    return await this.request('/etfs');
   }
 
-  // Ottieni lista simulazioni salvate
-  async getSimulations() {
-    try {
-      return await this.request('/simulations');
-    } catch (error) {
-      throw new Error('Errore recupero simulazioni');
-    }
+  // Ottieni ETF per ID
+  async getETFById(id) {
+    return await this.request(`/etfs/${id}`);
+  }
+
+  // Filtra ETF per livello di rischio
+  async getETFsByRisk(riskLevel) {
+    return await this.request(`/etfs/filter/risk/${riskLevel}`);
+  }
+
+  // Ottieni ETF con migliori performance
+  async getTopPerformingETFs(limit = 10) {
+    return await this.request(`/etfs/top-performing?limit=${limit}`);
+  }
+
+  // Ottieni ETF a basso costo
+  async getLowCostETFs(maxExpense = 0.5) {
+    return await this.request(`/etfs/low-cost?maxExpense=${maxExpense}`);
+  }
+
+  // ========== PORTFOLIO MANAGEMENT ==========
+  
+  // Crea nuovo portfolio
+  async createPortfolio(portfolioData) {
+    return await this.request('/portfolios', {
+      method: 'POST',
+      body: JSON.stringify(portfolioData),
+    });
+  }
+
+  // Ottieni portfolio per ID
+  async getPortfolioById(id) {
+    return await this.request(`/portfolios/${id}`);
+  }
+
+  // Aggiorna portfolio
+  async updatePortfolio(id, portfolioData) {
+    return await this.request(`/portfolios/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(portfolioData),
+    });
+  }
+
+  // Elimina portfolio
+  async deletePortfolio(id) {
+    return await this.request(`/portfolios/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Ottieni portfolio dell'utente
+  async getUserPortfolios(userId, includeTemplates = false) {
+    return await this.request(`/portfolios/user/${userId}?includeTemplates=${includeTemplates}`);
+  }
+
+  // Valida allocazione ETF
+  async validateAllocation(allocation) {
+    return await this.request('/portfolios/validate-allocation', {
+      method: 'POST',
+      body: JSON.stringify(allocation),
+    });
+  }
+
+  // Ottimizza portfolio
+  async optimizePortfolio(optimizationData) {
+    return await this.request('/portfolios/optimize', {
+      method: 'POST',
+      body: JSON.stringify(optimizationData),
+    });
+  }
+
+  // ========== SIMULATION MANAGEMENT ==========
+  
+  // Esegui simulazione
+  async runSimulation(simulationData) {
+    return await this.request('/simulations/run', {
+      method: 'POST',
+      body: JSON.stringify(simulationData),
+    });
+  }
+
+  // Ottieni tutte le simulazioni
+  async getAllSimulations(page = 0, size = 20) {
+    return await this.request(`/simulations?page=${page}&size=${size}`);
   }
 
   // Salva simulazione
   async saveSimulation(simulationData) {
-    try {
-      return await this.request('/simulations', {
-        method: 'POST',
-        body: JSON.stringify(simulationData),
-      });
-    } catch (error) {
-      throw new Error('Errore salvataggio simulazione');
-    }
+    return await this.request('/simulations', {
+      method: 'POST',
+      body: JSON.stringify(simulationData),
+    });
   }
 
-  // Ottieni dettaglio simulazione
-  async getSimulation(id) {
-    try {
-      return await this.request(`/simulations/${id}`);
-    } catch (error) {
-      throw new Error('Errore recupero simulazione');
-    }
+  // Ottieni simulazione per ID
+  async getSimulationById(id) {
+    return await this.request(`/simulations/${id}`);
   }
 
   // Elimina simulazione
   async deleteSimulation(id) {
-    try {
-      return await this.request(`/simulations/${id}`, {
-        method: 'DELETE',
-      });
-    } catch (error) {
-      throw new Error('Errore eliminazione simulazione');
-    }
+    return await this.request(`/simulations/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Confronta simulazioni
+  async compareSimulations(simulationIds) {
+    return await this.request('/simulations/compare', {
+      method: 'POST',
+      body: JSON.stringify({ simulation_ids: simulationIds }),
+    });
   }
 
   // ========== BACKTESTING ==========
   
-  // Esegui backtesting
-  async runBacktest(strategy, period, parameters) {
-    try {
-      return await this.request('/backtest/run', {
-        method: 'POST',
-        body: JSON.stringify({ strategy, period, parameters }),
-      });
-    } catch (error) {
-      throw new Error('Backtesting fallito');
-    }
+  // Esegui backtest
+  async runBacktest(backtestData) {
+    return await this.request('/backtest/run', {
+      method: 'POST',
+      body: JSON.stringify(backtestData),
+    });
+  }
+
+  // Confronta strategie
+  async compareStrategies(strategies, baseParameters) {
+    return await this.request('/backtest/compare-strategies', {
+      method: 'POST',
+      body: JSON.stringify({ strategies, base_parameters: baseParameters }),
+    });
   }
 
   // Ottieni risultati backtest
   async getBacktestResults(backtestId) {
-    try {
-      return await this.request(`/backtest/results/${backtestId}`);
-    } catch (error) {
-      throw new Error('Errore recupero risultati backtest');
-    }
+    return await this.request(`/backtest/${backtestId}`);
   }
 
-  // ========== DATI DI MERCATO ==========
+  // ========== USER MANAGEMENT ==========
   
-  // Ottieni dati ETF disponibili
-  async getETFData() {
-    try {
-      return await this.request('/market-data/etfs');
-    } catch (error) {
-      throw new Error('Errore recupero dati ETF');
-    }
+  // Ottieni tutti gli utenti
+  async getAllUsers() {
+    return await this.request('/users');
   }
 
-  // Ottieni dati di mercato per simboli specifici
-  async getMarketData(symbols) {
-    try {
-      const symbolsParam = Array.isArray(symbols) ? symbols.join(',') : symbols;
-      return await this.request(`/market-data?symbols=${symbolsParam}`);
-    } catch (error) {
-      throw new Error('Errore recupero dati di mercato');
-    }
-  }
-
-  // Ottieni prezzi real-time
-  async getRealTimePrices(symbols) {
-    try {
-      const symbolsParam = Array.isArray(symbols) ? symbols.join(',') : symbols;
-      return await this.request(`/market-data/real-time?symbols=${symbolsParam}`);
-    } catch (error) {
-      throw new Error('Errore recupero prezzi real-time');
-    }
-  }
-
-  // Ottieni dati storici
-  async getHistoricalData(symbol, period = '1y') {
-    try {
-      return await this.request(`/market-data/historical/${symbol}?period=${period}`);
-    } catch (error) {
-      throw new Error('Errore recupero dati storici');
-    }
-  }
-
-  // ========== ANALISI E OTTIMIZZAZIONE ==========
-  
-  // Ottimizza portfolio
-  async optimizePortfolio(constraints) {
-    try {
-      return await this.request('/analysis/optimize', {
-        method: 'POST',
-        body: JSON.stringify(constraints),
-      });
-    } catch (error) {
-      throw new Error('Ottimizzazione portfolio fallita');
-    }
-  }
-
-  // Analisi del rischio
-  async performRiskAnalysis(portfolioData) {
-    try {
-      return await this.request('/analysis/risk', {
-        method: 'POST',
-        body: JSON.stringify(portfolioData),
-      });
-    } catch (error) {
-      throw new Error('Analisi rischio fallita');
-    }
-  }
-
-  // Predizioni di mercato
-  async getMarketPredictions(horizon = '6m') {
-    try {
-      return await this.request(`/analysis/predictions?horizon=${horizon}`);
-    } catch (error) {
-      throw new Error('Errore recupero predizioni');
-    }
-  }
-
-  // Stress testing
-  async stressTesting(portfolioData, scenarios) {
-    try {
-      return await this.request('/analysis/stress-test', {
-        method: 'POST',
-        body: JSON.stringify({ portfolio: portfolioData, scenarios }),
-      });
-    } catch (error) {
-      throw new Error('Stress testing fallito');
-    }
-  }
-
-  // ========== CONFRONTO STRATEGIE ==========
-  
-  // Confronta multiple strategie
-  async compareStrategies(strategies, config) {
-    try {
-      return await this.request('/analysis/compare-strategies', {
-        method: 'POST',
-        body: JSON.stringify({ strategies, config }),
-      });
-    } catch (error) {
-      throw new Error('Confronto strategie fallito');
-    }
-  }
-
-  // ========== PORTFOLIO ==========
-  
-  // Calcola metriche portfolio
-  async calculatePortfolioMetrics(portfolioData) {
-    try {
-      return await this.request('/portfolio/metrics', {
-        method: 'POST',
-        body: JSON.stringify(portfolioData),
-      });
-    } catch (error) {
-      throw new Error('Calcolo metriche fallito');
-    }
-  }
-
-  // Suggerimenti di ribilanciamento
-  async getRebalancingSuggestions(portfolioId) {
-    try {
-      return await this.request(`/portfolio/${portfolioId}/rebalance`);
-    } catch (error) {
-      throw new Error('Errore recupero suggerimenti ribilanciamento');
-    }
-  }
-
-  // ========== UTILITY ==========
-  
-  // Verifica stato API
-  async checkHealth() {
-    try {
-      return await this.request('/health');
-    } catch (error) {
-      throw new Error('API non raggiungibile');
-    }
-  }
-
-  // Ottieni configurazione ETF disponibili
-  async getAvailableETFs() {
-    try {
-      return await this.request('/config/etfs');
-    } catch (error) {
-      throw new Error('Errore recupero configurazione ETF');
-    }
-  }
-
-  // Ottieni strategie disponibili
-  async getAvailableStrategies() {
-    try {
-      return await this.request('/config/strategies');
-    } catch (error) {
-      throw new Error('Errore recupero strategie');
-    }
+  // Crea utente demo
+  async createUser(userData) {
+    return await this.request('/users', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
   }
 }
 
