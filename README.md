@@ -53,8 +53,8 @@ Una piattaforma per la simulazione di investimenti ETF con Piano di Accumulo del
 
 ### 1. **Clone del Repository**
 ```bash
-git clone https://github.com/marco-rossi/etf-pac-simulator.git
-cd etf-pac-simulator
+git clone https://github.com/gennaroferrara/etf-pac-simulator-front-end.git
+cd etf-pac-simulator-front-end
 ```
 
 ### 2. **Installazione Dipendenze**
